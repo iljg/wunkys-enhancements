@@ -1,7 +1,6 @@
 package net.iljg.wunkysenhancements;
 
 import net.iljg.wunkysenhancements.config.Config;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 
@@ -21,15 +20,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.net.ServerSocket;
 
 public class Grind {
 
-    public static Player player = Minecraft.getInstance().player;
+    public static Player chatPlayer = Minecraft.getInstance().player;
 
     public static float onDamage(Level world, Entity entity, DamageSource damageSource, float damageAmount) {
         Entity source = damageSource.getEntity();
@@ -41,14 +36,33 @@ public class Grind {
             return damageAmount;
         }
 
-        if (!(source instanceof Player player)) {
+        if (!(source instanceof Player)) {
             return damageAmount;
         }
 
+        Player player = (Player) source;
         ItemStack hand = player.getMainHandItem();
 
         if (hand.getItem() instanceof SwordItem || hand.getItem() instanceof AxeItem) {
+            CompoundTag nbtc = hand.getOrCreateTag();
+            if (nbtc.contains("sharper")) {
+                int sharpLeft = nbtc.getInt("sharper");
+                if (!player.isCreative()) {
+                    sharpLeft--;
+                }
+                if (sharpLeft > 0) {
+                    nbtc.putInt("sharper", sharpLeft);
+                    double modifier = Config.SHARPNESS_DAMAGE.get();
+                    damageAmount *= (float) modifier;
 
+                }
+                else {
+                    nbtc.remove("sharper");
+                }
+                hand.setTag(nbtc);
+                Utils.updateName(hand, sharpLeft);
+
+            }
         }
 
         return damageAmount;
@@ -64,22 +78,14 @@ public class Grind {
             if (player.isCrouching()) {
                 ItemStack itemstack = player.getItemInHand(hand);
                 if (itemstack.getItem() instanceof SwordItem || itemstack.getItem() instanceof AxeItem) {
-                    PlayerChatMessage chatMessage2 = PlayerChatMessage.unsigned(player.getUUID(), "PASSED CHECKS");
-                    player.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(chatMessage2), false, ChatType.bind(ChatType.CHAT, player));
-                    CompoundTag nbtc = new CompoundTag();
-
-                    CompoundTag customData = itemstack.getTag();
-                    if (customData != null) {
-                        nbtc = customData.getCompound("sharpened");
-                    }
-
+                    CompoundTag nbtc = itemstack.getOrCreateTag();
                     int sharpeneduses = Config.SHARPNESS_CHARGES.get();
 
-                    nbtc.putInt("sharpened", sharpeneduses);
-                    PlayerChatMessage chatMessage3 = PlayerChatMessage.unsigned(player.getUUID(), nbtc.toString());
-                    player.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(chatMessage3), false, ChatType.bind(ChatType.CHAT, player));
+                    nbtc.putInt("sharper", sharpeneduses);
+                    itemstack.setTag(nbtc);
                     Utils.updateName(itemstack, sharpeneduses);
-                    Utils.sendMessage(player, "Your tool has been sharpened with " + sharpeneduses + " uses.", ChatFormatting.DARK_GREEN);
+                    PlayerChatMessage chatMessage = PlayerChatMessage.unsigned(chatPlayer.getUUID(), "Weapon Sharpened with " + sharpeneduses + " uses.");
+                    chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(chatMessage), false, ChatType.bind(ChatType.CHAT, chatPlayer));
                     return false;
                 }
             }
