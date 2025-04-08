@@ -72,21 +72,27 @@ public class Grind {
         if (world.isClientSide || !hand.equals(InteractionHand.MAIN_HAND)) {
             return true;
         }
-
+        int xpCost = Config.XP_REQUIREMENT.get();
         Block block = world.getBlockState(pos).getBlock();
         if (block.equals(Blocks.GRINDSTONE)) {
             if (player.isCrouching()) {
-                ItemStack itemstack = player.getItemInHand(hand);
-                if (itemstack.getItem() instanceof SwordItem || itemstack.getItem() instanceof AxeItem) {
-                    CompoundTag nbtc = itemstack.getOrCreateTag();
-                    int sharpeneduses = Config.SHARPNESS_CHARGES.get();
+                if (player.totalExperience > xpCost) {
+                    ItemStack itemstack = player.getItemInHand(hand);
+                    if (itemstack.getItem() instanceof SwordItem || itemstack.getItem() instanceof AxeItem) {
+                        CompoundTag nbtc = itemstack.getOrCreateTag();
+                        int sharpeneduses = Config.SHARPNESS_CHARGES.get();
 
-                    nbtc.putInt("sharper", sharpeneduses);
-                    itemstack.setTag(nbtc);
-                    Utils.updateName(itemstack, sharpeneduses);
-                    PlayerChatMessage chatMessage = PlayerChatMessage.unsigned(chatPlayer.getUUID(), "Weapon Sharpened with " + sharpeneduses + " uses.");
-                    chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(chatMessage), false, ChatType.bind(ChatType.CHAT, chatPlayer));
-                    return false;
+                        nbtc.putInt("sharper", sharpeneduses);
+                        itemstack.setTag(nbtc);
+                        Utils.updateName(itemstack, sharpeneduses);
+                        player.giveExperiencePoints(-xpCost);
+                        PlayerChatMessage sharp = PlayerChatMessage.unsigned(chatPlayer.getUUID(), "Weapon Sharpened with " + sharpeneduses + " uses.");
+                        chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(sharp), false, ChatType.bind(ChatType.CHAT, chatPlayer));
+                        return false;
+                    }
+                } else {
+                    PlayerChatMessage xplow = PlayerChatMessage.unsigned(chatPlayer.getUUID(), xpCost - player.totalExperience + " more xp required.");
+                    chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(xplow), false, ChatType.bind(ChatType.CHAT, chatPlayer));
                 }
             }
         }
