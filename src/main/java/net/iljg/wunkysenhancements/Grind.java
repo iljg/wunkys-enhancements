@@ -86,13 +86,13 @@ public class Grind {
                         itemstack.setTag(nbtc);
                         Utils.updateName(itemstack, sharpeneduses);
                         player.giveExperiencePoints(-xpCost);
-                        PlayerChatMessage sharp = PlayerChatMessage.unsigned(chatPlayer.getUUID(), "Weapon Sharpened with " + sharpeneduses + " uses.");
-                        chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(sharp), false, ChatType.bind(ChatType.CHAT, chatPlayer));
+//                        PlayerChatMessage sharp = PlayerChatMessage.unsigned(chatPlayer.getUUID(), "Weapon Sharpened with " + sharpeneduses + " uses.");
+//                        chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(sharp), false, ChatType.bind(ChatType.CHAT, chatPlayer));
                         return false;
                     }
                 } else {
-                    PlayerChatMessage xplow = PlayerChatMessage.unsigned(chatPlayer.getUUID(), xpCost - player.totalExperience + " more xp required.");
-                    chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(xplow), false, ChatType.bind(ChatType.CHAT, chatPlayer));
+//                    PlayerChatMessage xplow = PlayerChatMessage.unsigned(chatPlayer.getUUID(), xpCost - player.totalExperience + " more xp required.");
+//                    chatPlayer.createCommandSourceStack().sendChatMessage(new OutgoingChatMessage.Player(xplow), false, ChatType.bind(ChatType.CHAT, chatPlayer));
                 }
             }
         }
