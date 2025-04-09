@@ -28,7 +28,7 @@ public class Config {
                 .defineInRange("Sharpness damage", 1.5,0, 5);
 
         XP_REQUIREMENT = BUILDER.comment("XP cost of enhancing gear. Default 55")
-                .defineInRange("XP cost", 0, 0, 500);
+                .defineInRange("XP cost", 55, 0, 500);
 
         BUILDER.pop();
         SPEC = BUILDER.build();
